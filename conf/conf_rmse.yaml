@@ -24,6 +24,7 @@ CiaoDCD:
     DSR:
       8: {alpha0: 0.01, beta1: 1.0, beta2: 0:01, beta3: 0.00001}
       16: {alpha0: 0.01, beta1: 0.00001, beta2: 0.00001, beta3: 1.0}
+      32: {alpha0: 0.01, beta1: 0.01, beta2: 0.0001, beta3: 0.1}
     OLADSR:
       8: {delta_phi: 0.1, zeta: 0.1, gamma: 1.0, eta: 0.01, Lc: 1000.0}
       16: {delta_phi: 1.0, zeta: 0.01, gamma: 10.0, eta: 0.01, Lc: 0.1}

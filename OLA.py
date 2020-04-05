@@ -105,7 +105,7 @@ class OLA:
 
 
 if __name__ == "__main__":
-    R_train, R_test, S_bin, S_con = load_data("data/Epinions", remove=True)
+    R_train, R_test, S_bin, S_con = load_data("data/filmtrust", remove=True)
     ola = OLA(R_train, S_bin, d=8, delta_phi=10, delta_u=10, delta_v=10, Lc=100, lr=0.0001)
     metric = Metric(R_test)
     ola.train(iteration=150)

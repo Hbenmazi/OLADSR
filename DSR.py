@@ -1,5 +1,6 @@
 import itertools
 import logging
+import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 
 import numpy as np
@@ -576,8 +577,9 @@ def single_test():
     beta3 = 0.1
     rmse_sum = 0
     mae_sum = 0
+    time_list = []
     for _ in range(5):
-        R_train, R_test, S_bin, S_con = load_data("data/CiaoDVD", remove=True)
+        R_train, R_test, S_bin, S_con = load_data("data/filmtrust", remove=True)
         metric = Metric(R_test)
         dsr = DSR(R_train, S_bin, r, alpha0, beta1, beta2, beta3, maxR, minR, maxS, minS, init=False,
                   debug=False)
@@ -591,4 +593,4 @@ def single_test():
 
 
 if __name__ == "__main__":
-    grid_search()
+    single_test()

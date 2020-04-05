@@ -401,7 +401,7 @@ def sigle_test():
     for _ in range(5):
         R_train, R_test, S_bin, S_con = load_data("data/filmtrust", remove=True)
         metric = Metric(R_test)
-        dcf = DCF(R_train, r, alpha, beta, maxR=4.5, minR=0.5, init=False, debug=False)
+        dcf = DCF(R_train, r, alpha, beta, maxR=4.5, minR=0.5, init=False, debug=True)
         dcf.train(maxItr, maxItr2, tol_init)
         rmse_sum += metric.RMSE(dcf.B, dcf.D, r=r)
         mae_sum += metric.MAE(dcf.B, dcf.D, r=r)

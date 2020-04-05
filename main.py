@@ -13,7 +13,7 @@ from evaluator import Metric
 
 
 def gen_result_inner(dataset, model_name, r, para):
-    assert model_name in ['DCF', 'DSR', ' ']
+    assert model_name in ['DCF', 'DSR', 'OLADSE']
     assert dataset in ['filmtrust', 'Epinions', 'CiaoDVD']
     maxItr = 50
     maxItr2 = 5

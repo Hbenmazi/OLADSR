@@ -12,7 +12,7 @@ def Scale(s, scale, maxS, minS):
     return s
 
 
-def load_data(path, frac=0.8, remove=False):
+def load_data(path, frac=0.8, remove=False, user_filter=10, item_filter=10):
     # get matrix R and S
     rnames = ['user_id', 'item_id', 'rating']
     ratings = pd.read_csv(path + '/ratings.txt', sep=' ', header=None, names=rnames)
@@ -40,14 +40,14 @@ def load_data(path, frac=0.8, remove=False):
         while not done:
             l0 = len(ratings)
             ratings_by_user = ratings.groupby('user_id').size()
-            ratings_by_user_index = ratings_by_user.index[ratings_by_user >= 10]
+            ratings_by_user_index = ratings_by_user.index[ratings_by_user >= user_filter]
             ratings = ratings.loc[ratings['user_id'].isin(ratings_by_user_index)]
             social = social.loc[social['trustor_id'].isin(ratings_by_user_index)]
             social = social.loc[social['trustee_id'].isin(ratings_by_user_index)]
 
-            ratings_by_movie = ratings.groupby('item_id').size()
-            ratings_by_movie_index = ratings_by_movie.index[ratings_by_movie >= 10]
-            ratings = ratings.loc[ratings['item_id'].isin(ratings_by_movie_index)]
+            ratings_by_item = ratings.groupby('item_id').size()
+            ratings_by_item_index = ratings_by_item.index[ratings_by_item >= item_filter]
+            ratings = ratings.loc[ratings['item_id'].isin(ratings_by_item_index)]
 
             l1 = len(ratings)
             if l1 == l0:

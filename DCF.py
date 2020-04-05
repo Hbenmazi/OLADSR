@@ -358,15 +358,15 @@ def grid_search_inner(pa):
     tol_init = 1e-5
     maxR = 4.5
     minR = 0.5
-    rmse_sum = 0
+    ndcg5_sum = 0
     for _ in range(5):
         R_train, R_test, S_bin, S_con = load_data("data/CiaoDVD", remove=True)
         metric = Metric(R_test)
         dcf = DCF(R_train, pa[2], pa[0], pa[1], maxR, minR, init=False, debug=False)
         dcf.train(maxItr, maxItr2, tol_init)
-        rmse = metric.RMSE(dcf.B, dcf.D, r=pa[2])
-        rmse_sum += rmse
-    return rmse_sum / 5, (pa[0], pa[1])
+        ndcg5 = metric.NDCG(dcf.B, dcf.D, R_train, k=5)
+        ndcg5_sum += ndcg5
+    return ndcg5_sum / 5, (pa[0], pa[1])
 
 
 def grid_search():
@@ -380,9 +380,9 @@ def grid_search():
             task_list = [pool.submit(grid_search_inner, para) for para in paras]
             process_results = [task.result() for task in
                                tqdm(as_completed(task_list), desc="r={}".format(r), total=len(paras))]
-            rmse_to_para = {re[0]: re[1] for re in process_results}
-            best_rmse = min(rmse_to_para.keys())
-            best_para = rmse_to_para[best_rmse]
+            metric_to_para = {re[0]: re[1] for re in process_results}
+            best_metric = min(metric_to_para.keys())
+            best_para = metric_to_para[best_metric]
 
         best_alpha, best_beta = best_para
         logging.debug("DCF(r={},alpha={},beta={}):".format(r, best_alpha, best_beta))

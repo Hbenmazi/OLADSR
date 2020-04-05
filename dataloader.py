@@ -97,4 +97,4 @@ def load_data(path, frac=0.8, remove=False, user_filter=10, item_filter=10):
 
 
 if __name__ == "__main__":
-    load_data("data/Epinions")
+    load_data("data/filmtrust")

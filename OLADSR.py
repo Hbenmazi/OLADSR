@@ -208,14 +208,14 @@ def grid_search_inner(pa):
     maxItr = 50
     maxItr2 = 5
     tol_init = 1e-5
-    rmse_sum = 0
+    ndcg5_sum = 0
     for _ in range(5):
         R_train, R_test, S_bin, S_con = load_data("data/filmtrust", remove=True)
         metric = Metric(R_test)
         oladsr = OLADSR(R_train, S_bin, pa[5], pa[0], pa[1], pa[2], pa[3], pa[4], lr=0.0001, init=False, debug=False)
         oladsr.train(maxItr, maxItr2, tol_init)
-        rmse_sum += metric.RMSE(oladsr.Phi, oladsr.V, r=pa[5])
-    return rmse_sum / 5, (pa[0], pa[1], pa[2], pa[3], pa[4])
+        ndcg5_sum += metric.NDCG(oladsr.Phi, oladsr.V, R_train, k=5)
+    return ndcg5_sum / 5, (pa[0], pa[1], pa[2], pa[3], pa[4])
 
 
 def grid_search():
@@ -234,9 +234,9 @@ def grid_search():
             task_list = [pool.submit(grid_search_inner, para) for para in paras]
             process_results = [task.result() for task in
                                tqdm(as_completed(task_list), desc="r={}".format(r), total=len(paras))]
-            rmse_to_para = {re[0]: re[1] for re in process_results}
-            best_rmse = min(rmse_to_para.keys())
-            best_para = rmse_to_para[best_rmse]
+            metric_to_para = {re[0]: re[1] for re in process_results}
+            metric_rmse = min(metric_to_para.keys())
+            best_para = metric_to_para[metric_rmse]
 
         best_delta_phi, best_zeta, best_gamma, best_eta, best_Lc = best_para
 

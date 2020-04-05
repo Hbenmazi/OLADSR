@@ -524,16 +524,16 @@ def grid_search_inner(pa):
     minR = 0.5
     maxS = 1.0
     minS = 0.0
-    rmse_sum = 0
+    ndcg5_sum = 0
     for _ in range(5):
-        R_train, R_test, S_bin, S_con = load_data("data/filmtrust", remove=True)
+        R_train, R_test, S_bin, S_con = load_data("data/filmtrust", remove=True, user_filter=0)
         metric = Metric(R_test)
         dsr = DSR(R_train, S_bin, pa[4], pa[0], pa[1], pa[2], pa[3], maxR, minR, maxS, minS, init=False,
                   debug=False)
         dsr.train(maxItr, maxItr2, tol_init)
-        rmse = metric.RMSE(dsr.B, dsr.D, r=pa[4])
-        rmse_sum += rmse
-    return rmse_sum / 5, (pa[0], pa[1], pa[2], pa[3])
+        ndcg5 = metric.NDCG(dsr.B, dsr.D, R_train, k=5)
+        ndcg5_sum += ndcg5
+    return ndcg5_sum / 5, (pa[0], pa[1], pa[2], pa[3])
 
 
 def grid_search():
@@ -546,13 +546,13 @@ def grid_search():
     logging.basicConfig(filename="DSR.txt", level="DEBUG")
     for r in rs:
         paras = list(itertools.product(*[alpha0s, beta1s, beta2s, beta3s, [r]]))
-        with ProcessPoolExecutor(max_workers=1) as pool:
+        with ProcessPoolExecutor() as pool:
             task_list = [pool.submit(grid_search_inner, para) for para in paras]
             process_results = [task.result() for task in
                                tqdm(as_completed(task_list), desc="r={}".format(r), total=len(paras))]
-            rmse_to_para = {re[0]: re[1] for re in process_results}
-            best_rmse = min(rmse_to_para.keys())
-            best_para = rmse_to_para[best_rmse]
+            metric_to_para = {re[0]: re[1] for re in process_results}
+            best_metric = min(metric_to_para.keys())
+            best_para = metric_to_para[best_metric]
 
         best_alpha0, best_beta1, best_beta2, best_beta3 = best_para
 
@@ -577,7 +577,6 @@ def single_test():
     beta3 = 0.1
     rmse_sum = 0
     mae_sum = 0
-    time_list = []
     for _ in range(5):
         R_train, R_test, S_bin, S_con = load_data("data/filmtrust", remove=True)
         metric = Metric(R_test)
@@ -593,4 +592,4 @@ def single_test():
 
 
 if __name__ == "__main__":
-    single_test()
+    grid_search()

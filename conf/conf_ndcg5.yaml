@@ -1,0 +1,16 @@
+filmtrust:
+  DCF:
+    8: {alpha: 0.001, beta: 100.0}
+    16: {alpha: 0.0001, beta: 100.0}
+    24: {alpha: 0.01, beta: 100.0}
+    32: {alpha: 0.0001, beta: 100.0}
+  DSR:
+    8: {alpha0: 100.0, beta1: 0.1, beta2: 0.1, beta3: 0.1}
+    16: {alpha0: 100.0, beta1: 0.0001, beta2: 0.001, beta3: 0.00001}
+    24: {alpha0: 100.0, beta1: 0.1, beta2: 0.00001, beta3: 1.0}
+    32: {alpha0: 100.0, beta1: 0.00001, beta2: 0.01, beta3: 0.1}
+  OLADSR:
+    8: {delta_phi: 1.0, zeta: 1.0, gamma: 1.0, eta: 100.0, Lc: 100.0}
+    16: {delta_phi: 0.01, zeta: 0.1, gamma: 10.0, eta: 100.0, Lc: 100.0}
+    24: {delta_phi: 0.1, zeta: 1, gamma: 10.0, eta: 100.0, Lc: 1.0}
+    32: {delta_phi: 0.1, zeta: 1, gamma: 100.0, eta: 100.0, Lc: 1.0}

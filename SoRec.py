@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import tqdm
 from numpy.random import RandomState
 from scipy.sparse import csr_matrix
 from scipy.sparse import coo_matrix
@@ -22,38 +23,36 @@ def sigmoid_(x):
     return val * (1 - val)
 
 
-class MF:
-    def __init__(self, R, Validate, C, lr=0.01, momentum=0.8,
-                 lambda_c=10, lambda_u=0.001, lambda_v=0.001, lambda_z=0.001, latent_size=10, iters=1000, seed=None):
+class SoRec:
+    def __init__(self, R, C, r=10, lr=0.01, momentum=0.8,
+                 c=10, u=0.001, v=0.001, z=0.001, iters=1000, seed=None):
         """
 
         :param R: train set of ratings_data
-        :param Validate: validate set of ratings_data
         :param C: trust matrix of users
         :param lr: learning rate
         :param momentum:
-        :param lambda_c:
-        :param lambda_u:
-        :param lambda_v:
-        :param lambda_z:
-        :param latent_size:
+        :param c:
+        :param u:
+        :param v:
+        :param z:
+        :param r:
         :param iters: iteration
         :param seed:
         """
         self.R = R
-        self.Validate = Validate
         self.C = C
-        self.lambda_c = lambda_c
-        self.lambda_u = lambda_u
-        self.lambda_z = lambda_z
-        self.lambda_v = lambda_v
-        self.latent_size = latent_size
+        self.lambda_c = c
+        self.lambda_u = u
+        self.lambda_z = z
+        self.lambda_v = v
+        self.latent_size = r
         self.random_state = RandomState(seed)
         self.iters = iters
         self.lr = lr
-        self.U = np.mat(self.random_state.rand(latent_size, np.size(R, 0)))
-        self.V = np.mat(self.random_state.rand(latent_size, np.size(R, 1)))
-        self.Z = np.mat(self.random_state.rand(latent_size, np.size(C, 1)))
+        self.U = np.mat(self.random_state.rand(r, np.size(R, 0)))
+        self.V = np.mat(self.random_state.rand(r, np.size(R, 1)))
+        self.Z = np.mat(self.random_state.rand(r, np.size(C, 1)))
         self.momentum = momentum
 
     # the MAE for train set
@@ -61,17 +60,6 @@ class MF:
         loss = (np.fabs(4 * sigmoid(UVdata) + 1 - self.R.data)).sum()
         loss /= self.R.shape[0]
         return loss
-
-    # the MAE for validate_set
-    def vali_loss(self):
-        dif = 0.0
-        index = self.Validate.nonzero()
-        data = self.Validate.data
-        tot = data.shape[0]
-        for k in range(tot):
-            predict = 4 * sigmoid((self.U[:, index[0][k]].T * self.V[:, index[1][k]])[0, 0]) + 1
-            dif += math.fabs(data[k] - predict)
-        return dif / tot
 
     def train(self):
         Rindex = self.R.nonzero()
@@ -89,7 +77,7 @@ class MF:
         validate_loss_list = []
         begin = time.time()
         minloss = 5.0
-        for it in range(self.iters):
+        for it in (range(self.iters)):
             start = time.time()
             for k in range(Rnum):
                 UVdata[k] = (self.U[:, Rindex[0][k]].T * self.V[:, Rindex[1][k]])[0][0]
@@ -114,18 +102,16 @@ class MF:
             self.V = self.V - self.lr * momentum_v
             self.Z = self.Z - self.lr * momentum_z
             trloss = self.train_loss(UVdata)
-            valiloss = self.vali_loss()
             train_loss_list.append(trloss)
-            validate_loss_list.append(valiloss)
-            traintxt = open("train_loss_list___.txt", 'a+')
-            valitxt = open("validate_loss_list___.txt", 'a+')
-            traintxt.write(str(trloss) + "\n")
-            valitxt.write(str(valiloss) + "\n")
+            # traintxt = open("train_loss_list___.txt", 'a+')
+            # valitxt = open("validate_loss_list___.txt", 'a+')
+            # traintxt.write(str(trloss) + "\n")
+            # valitxt.write(str(valiloss) + "\n")
             # np.savetxt("train_loss_list.txt", train_loss_list)
             # np.savetxt("validate_loss_list.txt", validate_loss_list)
             end = time.time()
-            print("iter:{}, last_train_loss:{}, validate_loss:{}, timecost:{}, have run:{}".format(it + 1, trloss,
-                                                                                                   valiloss,
-                                                                                                   end - start,
-                                                                                                   end - begin))
+            # print("iter:{}, last_train_loss:{}, validate_loss:{}, timecost:{}, have run:{}".format(it + 1, trloss,
+            #                                                                                        valiloss,
+            #                                                                                        end - start,
+            #                                                                                        end - begin))
         return self.U, self.V, self.Z, train_loss_list, validate_loss_list

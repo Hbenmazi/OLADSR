@@ -376,7 +376,7 @@ def grid_search():
     logging.basicConfig(filename="DCF.txt", level="DEBUG")
     for r in rs:
         paras = list(itertools.product(*[alphas, betas, [r]]))
-        with ProcessPoolExecutor(max_workers=1) as pool:
+        with ProcessPoolExecutor() as pool:
             task_list = [pool.submit(grid_search_inner, para) for para in paras]
             process_results = [task.result() for task in
                                tqdm(as_completed(task_list), desc="r={}".format(r), total=len(paras))]
@@ -409,5 +409,22 @@ def sigle_test():
     print(mae_sum / 5)
 
 
+def grid_search2():
+    times = 5
+    init = False
+    metric_type = 'ndcg5'
+    dataset = 'filmtrust'
+    user_filter = 10
+    item_filter = 10
+    alphas = [1e-4, 1e-3, 1e-2, 1e-1, 1, 1e1, 1e2]
+    betas = [1e-4, 1e-3, 1e-2, 1e-1, 1, 1e1, 1e2]
+    rs = [8, 16, 24, 32]
+    dcf_gs = DCFGridSearch(times, init, metric_type, user_filter, item_filter)
+
+    dcf_gs.grid_search(rs, dataset, alphas, betas)
+
+
 if __name__ == "__main__":
-    sigle_test()
+    from GridSearch import DCFGridSearch
+
+    grid_search2()

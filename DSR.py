@@ -592,4 +592,4 @@ def single_test():
 
 
 if __name__ == "__main__":
-    grid_search()
+    single_test()

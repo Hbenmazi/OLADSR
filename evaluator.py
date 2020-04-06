@@ -14,34 +14,50 @@ def normalization(x, start, end):
     return (x - np.min(x)) / _range * (end - start) + start
 
 
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+
 class Metric:
     def __init__(self, R_test):
         self.R_test = R_test
         self.n, self.m = R_test.shape
         self.consumed_items_list = [self.R_test[i, :].indices for i in range(self.n)]
 
-    def RMSE(self, B, D, r=None):
+    def RMSE(self, B, D, r=None, ifsigmoid=False):
+        assert r is None or ifsigmoid is False
         observed_rate_idx = np.nonzero(self.R_test)
         R_true = self.R_test[observed_rate_idx].getA().squeeze()
         R_pred = B[:, observed_rate_idx[0]] * D[:, observed_rate_idx[1]]
         R_pred = R_pred.sum(axis=0).squeeze()
+        maxR = R_true.max()
+        minR = R_true.min()
         if r is not None:
-            maxR = R_true.max()
-            minR = R_true.min()
             R_pred = (R_pred + r) / float(2 * r)
             R_pred = R_pred * (maxR - minR) + minR
+
+        if ifsigmoid:
+            R_pred = sigmoid(R_pred)
+            R_pred = R_pred * (maxR - minR) + minR
+
         return np.sqrt(mean_squared_error(R_true, R_pred))
 
-    def MAE(self, B, D, r=None):
+    def MAE(self, B, D, r=None, ifsigmoid=False):
+        assert r is None or ifsigmoid is False
         observed_rate_idx = np.nonzero(self.R_test)
         R_true = self.R_test[observed_rate_idx].getA().squeeze()
         R_pred = B[:, observed_rate_idx[0]] * D[:, observed_rate_idx[1]]
         R_pred = R_pred.sum(axis=0).squeeze()
+        maxR = R_true.max()
+        minR = R_true.min()
         if r is not None:
-            maxR = R_true.max()
-            minR = R_true.min()
             R_pred = (R_pred + r) / float(2 * r)
             R_pred = R_pred * (maxR - minR) + minR
+
+        if ifsigmoid:
+            R_pred = sigmoid(R_pred)
+            R_pred = R_pred * (maxR - minR) + minR
+
         return mean_absolute_error(R_true, R_pred)
 
     def Recall(self, B, D, k):
